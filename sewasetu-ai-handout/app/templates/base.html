@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sewa Setu - Old Age Pension Portal</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f0f2f5;color:#222}
+.header{background:#0b3d6e;color:#fff;padding:14px 28px}
+.header h1{margin:0;font-size:22px}
+.header .sub{font-size:13px;color:#cfe0f3}
+.band{background:#f7931e;height:5px}
+.container{max-width:860px;margin:24px auto;background:#fff;padding:28px;
+border:1px solid #d7dbe0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.btn{background:#0b3d6e;color:#fff;border:none;padding:10px 22px;font-size:15px;cursor:pointer}
+.btn:hover{background:#0d4a85}
+label{display:block;margin:12px 0 4px;font-weight:bold;font-size:14px}
+input[type=text],input[type=password],select{width:100%;max-width:420px;padding:8px;
+border:1px solid #aab;font-size:14px}
+.flash{background:#fdecea;border:1px solid #e57373;color:#a33;padding:10px 14px;margin:14px 0}
+.note{font-size:13px;color:#555}
+.footer{max-width:860px;margin:10px auto 40px;font-size:12px;color:#666;text-align:center}
+.footer a{color:#0b3d6e;margin:0 8px}
+table.tbl{border-collapse:collapse;width:100%}
+table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;text-align:left}
+.steps{font-size:13px;color:#777;margin-bottom:18px}
+.steps b{color:#0b3d6e}
+.assistant-launcher{position:fixed;right:22px;bottom:22px;background:#0b3d6e;color:#fff;border:0;border-radius:50%;width:54px;height:54px;font-size:23px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.25);z-index:10}
+.assistant-panel{position:fixed;right:22px;bottom:88px;width:330px;max-width:calc(100vw - 32px);height:430px;background:#fff;border:1px solid #c8d1dc;box-shadow:0 5px 24px rgba(0,0,0,.2);display:flex;flex-direction:column;z-index:10}
+.assistant-panel[hidden]{display:none}
+.assistant-head{background:#0b3d6e;color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.assistant-head strong{font-size:15px}.assistant-close{background:transparent;color:#fff;border:0;font-size:20px;cursor:pointer;line-height:1}
+.assistant-messages{padding:12px;overflow-y:auto;flex:1;background:#f7f9fb}
+.assistant-message{padding:8px 10px;margin:0 0 9px;border-radius:4px;font-size:13px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.assistant-message.agent{background:#e5edf5;color:#16344d;margin-right:22px}.assistant-message.user{background:#0b3d6e;color:#fff;margin-left:22px}
+.assistant-tools{display:flex;gap:6px;align-items:center;padding:8px 9px 0;border-top:1px solid #d7dbe0;font-size:12px}
+.assistant-tools select{width:auto;max-width:none;padding:5px;font-size:12px}.assistant-status{color:#666;min-height:16px}
+.assistant-form{display:flex;gap:6px;padding:7px 9px 9px}.assistant-form input{min-width:0;flex:1;padding:9px;border:1px solid #aab;font-size:13px}
+.assistant-form button{background:#f7931e;color:#222;border:0;padding:0 13px;cursor:pointer;font-weight:bold}.assistant-form button:disabled{opacity:.55;cursor:wait}
+.assistant-mic{background:#0b3d6e!important;color:#fff!important;padding:0 11px!important}.assistant-mic.listening{background:#b3261e!important}
+@media(max-width:520px){.assistant-launcher{right:16px;bottom:16px}.assistant-panel{right:16px;bottom:82px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Sewa Setu &mdash; Old Age Pension Portal</h1>
+  <div class="sub">Department of Social Welfare &middot; Government of Purvanchal</div>
+</div>
+<div class="band"></div>
+<div class="container">
+{% with messages = get_flashed_messages() %}
+  {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+{% endwith %}
+{% block content %}{% endblock %}
+</div>
+{% if not session.get('admin') %}
+<button class="assistant-launcher" id="assistant-launcher" type="button" aria-label="Open assistant" title="Open assistant">?</button>
+<section class="assistant-panel" id="assistant-panel" hidden aria-label="Sewa Setu assistant">
+  <div class="assistant-head"><strong>Sewa Setu Assistant</strong>
+    <button class="assistant-close" id="assistant-close" type="button" aria-label="Close assistant">&times;</button>
+  </div>
+  <div class="assistant-messages" id="assistant-messages" aria-live="polite">
+    <div class="assistant-message agent">Hello. I can help with pension eligibility, documents, applications, and status.</div>
+  </div>
+  <div class="assistant-tools">
+    <label for="assistant-language">Voice</label>
+    <select id="assistant-language" aria-label="Voice language">
+      <option value="en-IN">English</option>
+      <option value="hi-IN">Hindi</option>
+    </select>
+    <span class="assistant-status" id="assistant-status" aria-live="polite"></span>
+  </div>
+  <form class="assistant-form" id="assistant-form">
+    <input id="assistant-input" type="text" maxlength="1000" autocomplete="off" placeholder="Ask about your pension application" aria-label="Message assistant">
+    <button class="assistant-mic" id="assistant-mic" type="button" aria-label="Speak to assistant" title="Speak to assistant">&#127908;</button>
+    <button id="assistant-send" type="submit">Send</button>
+  </form>
+</section>
+<script>
+(function () {
+  const launcher = document.getElementById("assistant-launcher");
+  const panel = document.getElementById("assistant-panel");
+  const close = document.getElementById("assistant-close");
+  const form = document.getElementById("assistant-form");
+  const input = document.getElementById("assistant-input");
+  const send = document.getElementById("assistant-send");
+  const mic = document.getElementById("assistant-mic");
+  const language = document.getElementById("assistant-language");
+  const status = document.getElementById("assistant-status");
+  const messages = document.getElementById("assistant-messages");
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  const storageKey = "sewa-setu-citizen-session";
+  let sessionId = localStorage.getItem(storageKey);
+  if (!sessionId) {
+    sessionId = window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+    localStorage.setItem(storageKey, sessionId);
+  }
+
+  function addMessage(text, kind) {
+    const message = document.createElement("div");
+    message.className = "assistant-message " + kind;
+    message.textContent = text;
+    messages.appendChild(message);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function speak(text) {
+    if (!window.speechSynthesis || !text) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = /[\u0900-\u097F]/.test(text) ? "hi-IN" : "en-IN";
+    window.speechSynthesis.speak(utterance);
+  }
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onstart = function () {
+      mic.classList.add("listening");
+      mic.setAttribute("aria-label", "Stop speaking");
+      status.textContent = language.value === "hi-IN" ? "सुन रहा है..." : "Listening...";
+    };
+    recognition.onresult = function (event) {
+      const transcript = event.results[0][0].transcript.trim();
+      input.value = (input.value ? input.value + " " : "") + transcript;
+      input.focus();
+      status.textContent = language.value === "hi-IN" ? "भेजने के लिए Send दबाएं" : "Review and send your message";
+    };
+    recognition.onerror = function (event) {
+      status.textContent = event.error === "not-allowed" ? "Microphone permission is required" : "Voice input was not captured";
+    };
+    recognition.onend = function () {
+      mic.classList.remove("listening");
+      mic.setAttribute("aria-label", "Speak to assistant");
+    };
+    mic.addEventListener("click", function () {
+      if (mic.classList.contains("listening")) recognition.stop();
+      else { recognition.lang = language.value; recognition.start(); }
+    });
+  } else {
+    mic.disabled = true;
+    mic.title = "Voice input is not supported in this browser";
+    status.textContent = "Voice input is not supported in this browser";
+  }
+
+  launcher.addEventListener("click", function () { panel.hidden = false; input.focus(); });
+  close.addEventListener("click", function () { panel.hidden = true; });
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const userMessage = input.value.trim();
+    if (!userMessage || send.disabled) return;
+    addMessage(userMessage, "user");
+    input.value = "";
+    send.disabled = true;
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({session_id: sessionId, user_message: userMessage, user_role: "citizen"})
+      });
+      const raw = await response.text();
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch (parseError) {
+        throw new Error("The assistant returned an invalid response.");
+      }
+      if (!response.ok) throw new Error(data.detail || "The assistant is unavailable.");
+      const agentResponse = data.response || "I could not produce a response.";
+      addMessage(agentResponse, "agent");
+      speak(agentResponse);
+    } catch (error) {
+      addMessage(error.message || "The assistant is unavailable.", "agent");
+    } finally {
+      send.disabled = false;
+      input.focus();
+    }
+  });
+}());
+</script>
+{% endif %}
+<div class="footer">
+  <a href="/">Home</a> | <a href="/about">About the Scheme</a> | <a href="/status">Application Status</a><br>
+  Department of Social Welfare, Government of Purvanchal.
+</div>
+</body>
+</html>
