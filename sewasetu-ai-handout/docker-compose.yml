@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:15
+    restart: unless-stopped
     environment:
       POSTGRES_DB: sewasetu
       POSTGRES_USER: sewasetu
@@ -9,40 +10,105 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./app/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./seed/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sewasetu -d sewasetu"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   app:
     build: ./app
+    restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-before-deploying}
+      SECRET_KEY: ${SECRET_KEY:-change-me-before-deploying}
+      AI_AGENT_URL: http://ai-agent:8200
       # the address at which people reach this portal; stamped into sign-in tokens and
       # discovery documents, so it must be the public one when deployed
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
     depends_on:
-      - db
-      - smsgw
+      db:
+        condition: service_healthy
+      smsgw:
+        condition: service_started
     volumes:
       - uploads:/var/sewasetu/uploads
       - applogs:/var/log/sewasetu
 
   scheduler:
     build: ./app
+    restart: unless-stopped
     # Run the deemed-approval job once at startup (so a freshly restored
     # database is brought up to date), then hand over to cron for the nightly run.
     command: ["sh", "-c", "until python /app/scripts/deemed_approval.py; do sleep 5; done; exec cron -f"]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - applogs:/var/log/sewasetu
 
   smsgw:
     build: ./smsgw
+    restart: unless-stopped
     # internal only — reached by the app over the docker network and exposed to
     # users via the app at /__gateway/ (so no second host port is needed)
     expose:
       - "8025"
+
+  citizen-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    restart: unless-stopped
+    command: ["python", "citizen_mcp.py"]
+    environment:
+      MCP_PORT: "8101"
+      MCP_TOKEN_SECRET: ${MCP_TOKEN_SECRET:-change-me-before-deploying}
+    depends_on:
+      db:
+        condition: service_healthy
+      smsgw:
+        condition: service_started
+    expose:
+      - "8101"
+
+  officer-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    restart: unless-stopped
+    command: ["python", "officer_mcp.py"]
+    environment:
+      MCP_PORT: "8102"
+      OFFICER_MCP_TOKEN: ${OFFICER_MCP_TOKEN:-change-me-before-deploying}
+      MCP_OFFICER_NAME: ${MCP_OFFICER_NAME:-mcp-officer}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8102"
+
+  ai-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    restart: unless-stopped
+    command: ["python", "ai_agent.py"]
+    environment:
+      CITIZEN_MCP_URL: http://citizen-mcp:8101/sse
+      OFFICER_MCP_URL: http://officer-mcp:8102/sse
+      OFFICER_MCP_TOKEN: ${OFFICER_MCP_TOKEN:-change-me-before-deploying}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:?GOOGLE_API_KEY must be set}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      AI_AGENT_PORT: "8200"
+    depends_on:
+      - citizen-mcp
+      - officer-mcp
+    expose:
+      - "8200"
 
 volumes:
   pgdata:
