@@ -3,15 +3,15 @@ services:
     image: postgres:15
     restart: unless-stopped
     environment:
-      POSTGRES_DB: sewasetu
-      POSTGRES_USER: sewasetu
-      POSTGRES_PASSWORD: sewasetu123
+      POSTGRES_DB: ${DB_NAME:-sewasetu}
+      POSTGRES_USER: ${DB_USER:-sewasetu}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./app/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./seed/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sewasetu -d sewasetu"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-sewasetu} -d ${DB_NAME:-sewasetu}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -23,8 +23,14 @@ services:
       - "8000:8000"
     environment:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-before-deploying}
-      SECRET_KEY: ${SECRET_KEY:-change-me-before-deploying}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-sewasetu}
+      DB_USER: ${DB_USER:-sewasetu}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      SCHEME_DEADLINE: ${SCHEME_DEADLINE:-2026-10-31 23:59}
       AI_AGENT_URL: http://ai-agent:8200
       # the address at which people reach this portal; stamped into sign-in tokens and
       # discovery documents, so it must be the public one when deployed
@@ -37,6 +43,12 @@ services:
     volumes:
       - uploads:/var/sewasetu/uploads
       - applogs:/var/log/sewasetu
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   scheduler:
     build: ./app
@@ -44,6 +56,12 @@ services:
     # Run the deemed-approval job once at startup (so a freshly restored
     # database is brought up to date), then hand over to cron for the nightly run.
     command: ["sh", "-c", "until python /app/scripts/deemed_approval.py; do sleep 5; done; exec cron -f"]
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-sewasetu}
+      DB_USER: ${DB_USER:-sewasetu}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
     depends_on:
       db:
         condition: service_healthy
@@ -63,10 +81,16 @@ services:
       context: .
       dockerfile: Dockerfile.agent
     restart: unless-stopped
+    profiles: ["ai"]
     command: ["python", "citizen_mcp.py"]
     environment:
       MCP_PORT: "8101"
       MCP_TOKEN_SECRET: ${MCP_TOKEN_SECRET:-change-me-before-deploying}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-sewasetu}
+      DB_USER: ${DB_USER:-sewasetu}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
     depends_on:
       db:
         condition: service_healthy
@@ -80,11 +104,17 @@ services:
       context: .
       dockerfile: Dockerfile.agent
     restart: unless-stopped
+    profiles: ["ai"]
     command: ["python", "officer_mcp.py"]
     environment:
       MCP_PORT: "8102"
       OFFICER_MCP_TOKEN: ${OFFICER_MCP_TOKEN:-change-me-before-deploying}
       MCP_OFFICER_NAME: ${MCP_OFFICER_NAME:-mcp-officer}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-sewasetu}
+      DB_USER: ${DB_USER:-sewasetu}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
     depends_on:
       db:
         condition: service_healthy
@@ -96,12 +126,13 @@ services:
       context: .
       dockerfile: Dockerfile.agent
     restart: unless-stopped
+    profiles: ["ai"]
     command: ["python", "ai_agent.py"]
     environment:
       CITIZEN_MCP_URL: http://citizen-mcp:8101/sse
       OFFICER_MCP_URL: http://officer-mcp:8102/sse
       OFFICER_MCP_TOKEN: ${OFFICER_MCP_TOKEN:-change-me-before-deploying}
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:?GOOGLE_API_KEY must be set}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
       AI_AGENT_PORT: "8200"
     depends_on:

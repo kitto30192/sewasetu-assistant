@@ -28,13 +28,17 @@ SLA_DAYS = config.getint("pension", "sla_days")
 SMS_GATEWAY_URL = config.get("app", "sms_gateway_url")
 
 
+def _env_or(section, key, env):
+    return os.environ.get(env) or config.get(section, key, fallback="")
+
+
 def main():
     conn = psycopg2.connect(
-        host=config.get("database", "host"),
-        port=config.get("database", "port"),
-        dbname=config.get("database", "name"),
-        user=config.get("database", "user"),
-        password=config.get("database", "password"),
+        host=_env_or("database", "host", "DB_HOST"),
+        port=_env_or("database", "port", "DB_PORT"),
+        dbname=_env_or("database", "name", "DB_NAME"),
+        user=_env_or("database", "user", "DB_USER"),
+        password=_env_or("database", "password", "DB_PASSWORD"),
     )
     cur = conn.cursor()
     cutoff = datetime.now() - timedelta(days=SLA_DAYS)

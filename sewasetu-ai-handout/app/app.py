@@ -12,6 +12,7 @@ if __name__ == "__main__":
     sys.modules["app"] = sys.modules["__main__"]
 
 import os
+import secrets
 import io
 import re
 import random
@@ -53,7 +54,9 @@ else:
     config.read(os.path.join(BASE_DIR, "config", "app.ini"))
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY") or config.get("app", "secret_key")
+app.secret_key = (os.environ.get("SECRET_KEY")
+                  or config.get("app", "secret_key")
+                  or secrets.token_hex(32))
 # Two hours: elderly applicants fill the form slowly; the draft lives in the session.
 app.config["PERMANENT_SESSION_LIFETIME"] = 7200
 
@@ -68,8 +71,9 @@ SMS_GATEWAY_URL = config.get("app", "sms_gateway_url")
 AI_AGENT_URL = os.environ.get("AI_AGENT_URL", "http://127.0.0.1:8200")
 OTP_VALIDITY_SECONDS = config.getint("app", "otp_validity_seconds")
 UPLOAD_DIR = config.get("app", "upload_dir")
-SCHEME_DEADLINE = datetime.strptime(config.get("pension", "scheme_deadline"),
-                                    "%Y-%m-%d %H:%M")
+SCHEME_DEADLINE = datetime.strptime(
+    os.environ.get("SCHEME_DEADLINE") or config.get("pension", "scheme_deadline"),
+    "%Y-%m-%d %H:%M")
 MIN_AGE = config.getint("pension", "min_age")
 SLA_DAYS = config.getint("pension", "sla_days")
 
@@ -95,11 +99,11 @@ def get_db():
         import db_local
         return db_local.get_db()
     return psycopg2.connect(
-        host=config.get("database", "host"),
-        port=config.get("database", "port"),
-        dbname=config.get("database", "name"),
-        user=config.get("database", "user"),
-        password=config.get("database", "password"),
+        host=os.environ.get("DB_HOST") or config.get("database", "host"),
+        port=os.environ.get("DB_PORT") or config.get("database", "port"),
+        dbname=os.environ.get("DB_NAME") or config.get("database", "name"),
+        user=os.environ.get("DB_USER") or config.get("database", "user"),
+        password=os.environ.get("DB_PASSWORD") or config.get("database", "password", fallback=""),
     )
 
 
@@ -260,9 +264,15 @@ def ai_chat_proxy():
     except requests.RequestException:
         return jsonify({"detail": "The assistant is temporarily unavailable."}), 503
 
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok", "service": "sewasetu-app"}), 200
+
+
 @app.route("/")
 def index():
-    return render_template("index.html", hours_left=deadline_remaining())
+    return render_template("index.html", hours_left=deadline_remaining(),
+                           deadline_label=SCHEME_DEADLINE.strftime("%d %B %Y, %I:%M %p"))
 
 
 @app.route("/about")

@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite3
+uploads/
+*.log
+config/app.local.ini
+.env
+.env.*

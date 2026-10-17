@@ -24,25 +24,62 @@ table.tbl{border-collapse:collapse;width:100%}
 table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;text-align:left}
 .steps{font-size:13px;color:#777;margin-bottom:18px}
 .steps b{color:#0b3d6e}
-.assistant-launcher{position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:9px;background:#123f46;color:#fff;border:0;border-radius:999px;padding:8px 17px 8px 9px;font-size:14px;font-weight:bold;letter-spacing:.2px;cursor:pointer;box-shadow:0 8px 24px rgba(18,63,70,.28);z-index:10;transition:transform .2s ease,box-shadow .2s ease}
-.assistant-launcher:hover{transform:translateY(-2px);box-shadow:0 11px 28px rgba(18,63,70,.35)}
-.assistant-launcher-mark{display:grid;place-items:center;width:36px;height:36px;background:#f4b942;color:#123f46;border-radius:50%;font-size:14px;font-weight:800}
-.assistant-panel{position:fixed;right:24px;bottom:86px;width:360px;max-width:calc(100vw - 32px);height:500px;background:#fff;border:1px solid #c8d9d7;border-radius:16px;box-shadow:0 18px 48px rgba(17,51,55,.24);display:flex;flex-direction:column;overflow:hidden;z-index:10;animation:assistant-rise .22s ease-out}
+
+/* ---------- Sewa Didi assistant ---------- */
+.assistant-wrap{position:fixed;right:24px;bottom:24px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.assistant-avatar-svg{width:100%;height:100%;display:block}
+.assistant-teaser{position:relative;background:#fff;color:#214a4d;border:1px solid #e4d9bd;border-radius:14px;padding:10px 30px 10px 14px;font-size:13px;line-height:1.45;max-width:260px;box-shadow:0 10px 26px rgba(17,51,55,.16);animation:assistant-rise .25s ease-out}
+.assistant-teaser:after{content:"";position:absolute;right:22px;bottom:-7px;width:14px;height:14px;background:#fff;border-right:1px solid #e4d9bd;border-bottom:1px solid #e4d9bd;transform:rotate(45deg)}
+.assistant-teaser-close{position:absolute;top:6px;right:6px;width:20px;height:20px;border:0;border-radius:50%;background:#f2ede0;color:#8a6d3b;font-size:15px;line-height:1;cursor:pointer}
+.assistant-launcher{display:flex;align-items:center;gap:10px;background:#0f3d46;color:#fff;border:0;border-radius:999px;padding:7px 18px 7px 7px;cursor:pointer;box-shadow:0 10px 28px rgba(15,61,70,.32);transition:transform .2s ease,box-shadow .2s ease;text-align:left}
+.assistant-launcher:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(15,61,70,.42)}
+.assistant-launcher-avatar{position:relative;width:46px;height:46px;border-radius:50%;overflow:hidden;flex:0 0 auto;box-shadow:0 0 0 2px rgba(255,255,255,.25)}
+.assistant-launcher-dot{position:absolute;right:2px;bottom:2px;width:12px;height:12px;border-radius:50%;background:#34c98e;border:2px solid #0f3d46}
+.assistant-launcher-text{display:flex;flex-direction:column;line-height:1.15}
+.assistant-launcher-name{font-weight:800;font-size:15px;letter-spacing:.2px}
+.assistant-launcher-hint{font-size:12px;color:#cfe9e4;font-weight:500}
+.assistant-launcher-pulse{animation:assistant-pulse 2.6s ease-in-out infinite}
+@keyframes assistant-pulse{0%,100%{box-shadow:0 10px 28px rgba(15,61,70,.32)}50%{box-shadow:0 10px 28px rgba(244,185,66,.55),0 0 0 0 rgba(244,185,66,.55)}}
+.assistant-panel{position:fixed;right:24px;bottom:88px;width:380px;max-width:calc(100vw - 32px);height:560px;max-height:calc(100vh - 120px);background:#fff;border:1px solid #d8e2df;border-radius:20px;box-shadow:0 22px 56px rgba(17,51,55,.28);display:flex;flex-direction:column;overflow:hidden;z-index:1000;animation:assistant-rise .24s ease-out}
 .assistant-panel[hidden]{display:none}
-.assistant-head{background:#123f46;color:#fff;padding:16px 17px;display:flex;justify-content:space-between;align-items:center;position:relative}
-.assistant-head:after{content:"";position:absolute;left:0;bottom:0;width:70px;height:3px;background:#f4b942}
-.assistant-head strong{font-size:16px;letter-spacing:.1px}.assistant-head strong:before{content:"";display:inline-block;width:8px;height:8px;margin:0 8px 2px 0;background:#73d0b4;border-radius:50%;box-shadow:0 0 0 4px rgba(115,208,180,.16)}
-.assistant-close{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:50%;width:28px;height:28px;font-size:19px;cursor:pointer;line-height:1}
-.assistant-messages{padding:18px 15px;overflow-y:auto;flex:1;background:#f3f7f5}
-.assistant-message{padding:11px 13px;margin:0 0 11px;border-radius:14px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word;box-shadow:0 2px 5px rgba(25,62,61,.04)}
-.assistant-message.agent{background:#fff;color:#214a4d;border:1px solid #d8e7e2;border-bottom-left-radius:5px;margin-right:30px}.assistant-message.user{background:#123f46;color:#fff;border-bottom-right-radius:5px;margin-left:30px}
-.assistant-tools{display:flex;gap:7px;align-items:center;padding:9px 13px 4px;border-top:1px solid #d8e7e2;background:#fff;font-size:11px;color:#587170}
-.assistant-tools select{width:auto;max-width:none;padding:5px;font-size:12px}.assistant-status{color:#666;min-height:16px}
-.assistant-form{display:flex;gap:7px;padding:8px 13px 13px;background:#fff}.assistant-form input{min-width:0;flex:1;padding:10px 12px;border:1px solid #bfd2ce;border-radius:9px;font-size:13px;outline:none}.assistant-form input:focus{border-color:#267a73;box-shadow:0 0 0 3px rgba(38,122,115,.12)}
-.assistant-form button{background:#f4b942;color:#183c3e;border:0;border-radius:9px;padding:0 13px;cursor:pointer;font-weight:bold}.assistant-form button:disabled{opacity:.55;cursor:wait}
-.assistant-mic{background:#e6f0ed!important;color:#123f46!important;padding:0 11px!important}.assistant-mic.listening{background:#b3261e!important;color:#fff!important}
+.assistant-head{background:linear-gradient(135deg,#0f3d46 0%,#15545e 100%);color:#fff;padding:15px 16px 13px;display:flex;align-items:center;gap:12px;position:relative}
+.assistant-head-avatar{width:46px;height:46px;border-radius:50%;overflow:hidden;flex:0 0 auto;box-shadow:0 0 0 2px rgba(255,255,255,.28)}
+.assistant-head-info{flex:1;min-width:0}
+.assistant-head-name{font-size:16px;font-weight:800;letter-spacing:.1px;display:flex;align-items:center;gap:7px}
+.assistant-head-name:after{content:"";display:inline-block;width:8px;height:8px;background:#34c98e;border-radius:50%;box-shadow:0 0 0 4px rgba(52,201,142,.18)}
+.assistant-head-tag{font-size:11.5px;color:#cfe9e4;margin-top:2px}
+.assistant-close{background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:50%;width:30px;height:30px;font-size:19px;cursor:pointer;line-height:1;flex:0 0 auto}
+.assistant-close:hover{background:rgba(255,255,255,.22)}
+.assistant-chips{display:flex;gap:7px;padding:10px 12px;overflow-x:auto;background:#fff8ec;border-bottom:1px solid #f0e6cd;scrollbar-width:none}
+.assistant-chips::-webkit-scrollbar{display:none}
+.assistant-chip{flex:0 0 auto;background:#fff;color:#0f3d46;border:1px solid #e6c877;border-radius:999px;padding:7px 12px;font-size:12px;cursor:pointer;font-weight:600;white-space:nowrap;transition:background .15s ease,color .15s ease}
+.assistant-chip:hover{background:#f4b942;color:#183c3e;border-color:#f4b942}
+.assistant-messages{padding:14px 13px;overflow-y:auto;flex:1;background:#f3f7f5;display:flex;flex-direction:column;gap:10px}
+.assistant-row{display:flex;align-items:flex-end;gap:8px}
+.assistant-row.user{justify-content:flex-end}
+.assistant-row .assistant-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex:0 0 auto;margin-bottom:2px}
+.assistant-message{padding:11px 13px;border-radius:15px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;box-shadow:0 2px 6px rgba(25,62,61,.05);max-width:82%}
+.assistant-message.agent{background:#fff;color:#214a4d;border:1px solid #d8e7e2;border-bottom-left-radius:5px}
+.assistant-message.user{background:#0f3d46;color:#fff;border-bottom-right-radius:5px}
+.assistant-typing{display:flex;align-items:center;gap:6px;padding:2px 13px 10px;background:#f3f7f5}
+.assistant-typing[hidden]{display:none}
+.assistant-typing span{width:7px;height:7px;border-radius:50%;background:#f4b942;display:inline-block;animation:assistant-dot 1.2s infinite ease-in-out}
+.assistant-typing span:nth-child(2){animation-delay:.15s}
+.assistant-typing span:nth-child(3){animation-delay:.3s}
+.assistant-typing em{font-style:normal;font-size:11.5px;color:#8aa;margin-left:6px}
+@keyframes assistant-dot{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
+.assistant-tools{display:flex;gap:8px;align-items:center;padding:8px 13px 2px;background:#fff;font-size:11px;color:#587170}
+.assistant-tools select{width:auto;max-width:none;padding:5px;font-size:12px;border-radius:8px}
+.assistant-status{color:#8a9;min-height:16px;font-size:11.5px;flex:1;text-align:right}
+.assistant-form{display:flex;gap:7px;padding:8px 13px 14px;background:#fff}
+.assistant-form input{min-width:0;flex:1;padding:11px 13px;border:1px solid #bfd2ce;border-radius:11px;font-size:13.5px;outline:none}
+.assistant-form input:focus{border-color:#267a73;box-shadow:0 0 0 3px rgba(38,122,115,.12)}
+.assistant-form button{background:#f4b942;color:#183c3e;border:0;border-radius:11px;padding:0 15px;cursor:pointer;font-weight:bold;font-size:14px}
+.assistant-form button:disabled{opacity:.55;cursor:wait}
+.assistant-mic{background:#e6f0ed!important;color:#0f3d46!important;padding:0 12px!important;font-size:16px!important}
+.assistant-mic.listening{background:#b3261e!important;color:#fff!important}
 @keyframes assistant-rise{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@media(max-width:520px){.assistant-launcher{right:16px;bottom:16px}.assistant-panel{right:16px;bottom:78px;width:calc(100vw - 32px);height:min(500px,calc(100vh - 105px))}}
+@media(max-width:520px){.assistant-wrap{right:14px;bottom:14px}.assistant-panel{right:14px;bottom:80px;width:calc(100vw - 28px);height:min(560px,calc(100vh - 110px))}}
 </style>
 </head>
 <body>
@@ -58,16 +95,67 @@ table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;
 {% block content %}{% endblock %}
 </div>
 {% if not session.get('admin') %}
-<button class="assistant-launcher" id="assistant-launcher" type="button" aria-label="Open assistant" title="Open assistant"><span class="assistant-launcher-mark">AI</span><span>Ask Sewa</span></button>
-<section class="assistant-panel" id="assistant-panel" hidden aria-label="Sewa Setu assistant">
-  <div class="assistant-head"><strong>Sewa Setu Assistant</strong>
+<!-- Sewa Didi avatar sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="sewa-didi" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="32" fill="#f4b942"/>
+      <circle cx="32" cy="32" r="27" fill="#0f3d46"/>
+      <path d="M32 13c-9 0-16 4.8-18 12.5-1.4 5.8.2 11.9 3.6 16.2 1.2-6.6 6.4-11.4 14.4-11.4s13.2 4.8 14.4 11.4c3.4-4.3 5-10.4 3.6-16.2C48 17.8 41 13 32 13z" fill="#f4b942"/>
+      <ellipse cx="32" cy="37" rx="13.5" ry="14.5" fill="#f7c98b"/>
+      <path d="M19 35c0-7.6 5.8-12.4 13-12.4s13 4.8 13 12.4c-2.2-3-6-4.8-13-4.8s-10.8 1.8-13 4.8z" fill="#3a2a20"/>
+      <path d="M24.6 30.6c1.3-.8 2.9-1.2 4.6-1.2M39.4 30.6c-1.3-.8-2.9-1.2-4.6-1.2" stroke="#3a2a20" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <circle cx="27.4" cy="35.6" r="1.9" fill="#1f2d33"/>
+      <circle cx="36.6" cy="35.6" r="1.9" fill="#1f2d33"/>
+      <circle cx="27.9" cy="35.1" r=".6" fill="#fff"/>
+      <circle cx="37.1" cy="35.1" r=".6" fill="#fff"/>
+      <path d="M32 36.4c.7 1.6 2.1 2.7 3.8 3" stroke="#d99f6b" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+      <path d="M27 43.6c2.9 3 6.9 3 10 0" stroke="#9a4a3c" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+      <circle cx="32" cy="29.6" r="1.5" fill="#c0392b"/>
+      <circle cx="18.2" cy="41" r="2" fill="#f4b942"/>
+      <circle cx="45.8" cy="41" r="2" fill="#f4b942"/>
+      <ellipse cx="24.6" cy="41" rx="2.3" ry="1.2" fill="#f2a58c" opacity=".5"/>
+      <ellipse cx="39.4" cy="41" rx="2.3" ry="1.2" fill="#f2a58c" opacity=".5"/>
+    </symbol>
+  </defs>
+</svg>
+<div class="assistant-wrap">
+  <div class="assistant-teaser" id="assistant-teaser" hidden>
+    <span>नमस्ते 🙏 I'm <b>Sewa Didi</b> — ask me about your pension!</span>
+    <button class="assistant-teaser-close" id="assistant-teaser-close" type="button" aria-label="Dismiss">&times;</button>
+  </div>
+  <button class="assistant-launcher assistant-launcher-pulse" id="assistant-launcher" type="button" aria-label="Open Sewa Didi assistant" title="Open Sewa Didi assistant">
+    <span class="assistant-launcher-avatar"><svg class="assistant-avatar-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#sewa-didi"></use></svg><span class="assistant-launcher-dot"></span></span>
+    <span class="assistant-launcher-text">
+      <span class="assistant-launcher-name">Sewa Didi</span>
+      <span class="assistant-launcher-hint">Need help?</span>
+    </span>
+  </button>
+</div>
+<section class="assistant-panel" id="assistant-panel" hidden aria-label="Sewa Didi assistant">
+  <div class="assistant-head">
+    <span class="assistant-head-avatar"><svg class="assistant-avatar-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#sewa-didi"></use></svg></span>
+    <span class="assistant-head-info">
+      <span class="assistant-head-name">Sewa Didi</span>
+      <span class="assistant-head-tag">आपकी पेंशन सहायिका &middot; Your pension helper</span>
+    </span>
     <button class="assistant-close" id="assistant-close" type="button" aria-label="Close assistant">&times;</button>
   </div>
-  <div class="assistant-messages" id="assistant-messages" aria-live="polite">
-    <div class="assistant-message agent">Namaste! I can help with pension eligibility, documents, applications, and status.</div>
+  <div class="assistant-chips" aria-label="Suggested questions">
+    <button class="assistant-chip" type="button" data-q="Am I eligible for the old-age pension?">Am I eligible?</button>
+    <button class="assistant-chip" type="button" data-q="What documents do I need to apply?">Documents needed</button>
+    <button class="assistant-chip" type="button" data-q="How do I check my application status?">Check my status</button>
+    <button class="assistant-chip" type="button" data-q="How do I apply for the pension step by step?">How to apply</button>
   </div>
+  <div class="assistant-messages" id="assistant-messages" aria-live="polite">
+    <div class="assistant-row agent">
+      <span class="assistant-avatar"><svg class="assistant-avatar-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#sewa-didi"></use></svg></span>
+      <div class="assistant-message agent">नमस्ते! 🙏 I'm <b>Sewa Didi</b>. I can help with eligibility, documents, applying, and checking your application status.</div>
+    </div>
+  </div>
+  <div class="assistant-typing" id="assistant-typing" hidden><span></span><span></span><span></span><em>Sewa Didi is typing…</em></div>
   <div class="assistant-tools">
-    <label for="assistant-language">Voice</label>
+    <label for="assistant-language" style="margin:0;font-size:11px;font-weight:600">Voice</label>
     <select id="assistant-language" aria-label="Voice language">
       <option value="en-IN">English</option>
       <option value="hi-IN">Hindi</option>
@@ -75,7 +163,7 @@ table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;
     <span class="assistant-status" id="assistant-status" aria-live="polite"></span>
   </div>
   <form class="assistant-form" id="assistant-form">
-    <input id="assistant-input" type="text" maxlength="1000" autocomplete="off" placeholder="Ask about your pension application" aria-label="Message assistant">
+    <input id="assistant-input" type="text" maxlength="1000" autocomplete="off" placeholder="Ask Sewa Didi about your pension…" aria-label="Message assistant">
     <button class="assistant-mic" id="assistant-mic" type="button" aria-label="Speak to assistant" title="Speak to assistant">&#127908;</button>
     <button id="assistant-send" type="submit">Send</button>
   </form>
@@ -92,6 +180,10 @@ table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;
   const language = document.getElementById("assistant-language");
   const status = document.getElementById("assistant-status");
   const messages = document.getElementById("assistant-messages");
+  const typing = document.getElementById("assistant-typing");
+  const teaser = document.getElementById("assistant-teaser");
+  const teaserClose = document.getElementById("assistant-teaser-close");
+  const chips = Array.prototype.slice.call(document.querySelectorAll(".assistant-chip"));
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   const storageKey = "sewa-setu-citizen-session";
@@ -102,10 +194,23 @@ table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;
   }
 
   function addMessage(text, kind) {
-    const message = document.createElement("div");
-    message.className = "assistant-message " + kind;
-    message.textContent = text;
-    messages.appendChild(message);
+    const row = document.createElement("div");
+    row.className = "assistant-row " + kind;
+    if (kind === "agent") {
+      row.innerHTML = '<span class="assistant-avatar"><svg class="assistant-avatar-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#sewa-didi"></use></svg></span><div class="assistant-message agent"></div>';
+      row.lastChild.textContent = text;
+    } else {
+      const bubble = document.createElement("div");
+      bubble.className = "assistant-message user";
+      bubble.textContent = text;
+      row.appendChild(bubble);
+    }
+    messages.appendChild(row);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function showTyping(on) {
+    typing.hidden = !on;
     messages.scrollTop = messages.scrollHeight;
   }
 
@@ -124,7 +229,7 @@ table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;
     recognition.onstart = function () {
       mic.classList.add("listening");
       mic.setAttribute("aria-label", "Stop speaking");
-      status.textContent = language.value === "hi-IN" ? "सुन रहा है..." : "Listening...";
+      status.textContent = language.value === "hi-IN" ? "सुन रही है..." : "Listening...";
     };
     recognition.onresult = function (event) {
       const transcript = event.results[0][0].transcript.trim();
@@ -149,20 +254,19 @@ table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;
     status.textContent = "Voice input is not supported in this browser";
   }
 
-  launcher.addEventListener("click", function () { panel.hidden = false; input.focus(); });
-  close.addEventListener("click", function () { panel.hidden = true; });
-  form.addEventListener("submit", async function (event) {
-    event.preventDefault();
-    const userMessage = input.value.trim();
-    if (!userMessage || send.disabled) return;
-    addMessage(userMessage, "user");
+  async function sendMessage(text) {
+    text = (text || "").trim();
+    if (!text || send.disabled) return;
+    addMessage(text, "user");
     input.value = "";
     send.disabled = true;
+    showTyping(true);
+    status.textContent = "Sewa Didi is typing…";
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({session_id: sessionId, user_message: userMessage, user_role: "citizen"})
+        body: JSON.stringify({session_id: sessionId, user_message: text, user_role: "citizen"})
       });
       const raw = await response.text();
       let data;
@@ -178,10 +282,37 @@ table.tbl td,table.tbl th{border:1px solid #ccd;padding:7px 10px;font-size:14px;
     } catch (error) {
       addMessage(error.message || "The assistant is unavailable.", "agent");
     } finally {
+      showTyping(false);
       send.disabled = false;
+      status.textContent = "";
       input.focus();
     }
+  }
+
+  launcher.addEventListener("click", function () {
+    panel.hidden = false;
+    teaser.hidden = true;
+    launcher.classList.remove("assistant-launcher-pulse");
+    input.focus();
   });
+  close.addEventListener("click", function () { panel.hidden = true; });
+  teaserClose.addEventListener("click", function () { teaser.hidden = true; });
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      panel.hidden = false;
+      sendMessage(chip.dataset.q);
+    });
+  });
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    sendMessage(input.value);
+  });
+
+  // Gently draw attention on first load, then settle.
+  setTimeout(function () {
+    if (panel.hidden) teaser.hidden = false;
+  }, 1400);
+  setTimeout(function () { teaser.hidden = true; }, 12000);
 }());
 </script>
 {% endif %}

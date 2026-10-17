@@ -29,7 +29,7 @@ def start_services():
     # Use the local config
     app_env = os.environ.copy()
     app_env["ADMIN_USERNAME"] = os.environ.get("ADMIN_USERNAME", "admin")
-    app_env["ADMIN_PASSWORD"] = os.environ.get("ADMIN_PASSWORD", "admin123")
+    app_env["ADMIN_PASSWORD"] = os.environ.get("ADMIN_PASSWORD", "local-dev-only")
     app_env["PUBLIC_BASE_URL"] = os.environ.get("PUBLIC_BASE_URL", "http://localhost:8000")
     app_env["CITIZEN_MCP_URL"] = os.environ.get(
         "CITIZEN_MCP_URL", "http://127.0.0.1:8101/sse"
